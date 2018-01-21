@@ -51,7 +51,7 @@ def lookup(symbol):
     try:
 
         # get json
-        url = "https://api.coinmarketcap.com/v1/ticker/?convert=EUR&limit=10"
+        url = "https://api.coinmarketcap.com/v1/ticker/?convert=USD&limit=1000"
         data = json.load(urllib.request.urlopen(url))
 
         stock = {}
