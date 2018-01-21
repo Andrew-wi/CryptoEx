@@ -195,6 +195,7 @@ def quote():
             return apology("must provide stock name", 400)
         # look up the value of the stock
         stock = lookup(request.form.get("symbol"))
+        print(stock)
         if not stock:
             return apology("stock query not found", 400)
         # returning the values of the dictionary lookup returned

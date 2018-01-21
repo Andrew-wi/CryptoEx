@@ -1,5 +1,6 @@
 import csv
 import urllib.request
+import json
 
 from flask import redirect, render_template, request, session
 from functools import wraps
@@ -49,64 +50,61 @@ def lookup(symbol):
     # http://stackoverflow.com/a/21351911
     try:
 
-        # GET CSV
-        url = f"http://download.finance.yahoo.com/d/quotes.csv?f=snl1&s={symbol}"
-        webpage = urllib.request.urlopen(url)
+        # get json
+        url = "https://api.coinmarketcap.com/v1/ticker/?convert=EUR&limit=10"
+        data = json.load(urllib.request.urlopen(url))
 
-        # Read CSV
-        datareader = csv.reader(webpage.read().decode("utf-8").splitlines())
+        stock = {}
+        # get the specific stock
+        for x in data:
+            if x["symbol"] == symbol:
+                print(x["symbol"])
+                stock = x
 
-        # Parse first row
-        row = next(datareader)
-
-        # Ensure stock exists
-        try:
-            price = float(row[2])
-        except:
-            return None
+        print(stock)
 
         # Return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
         return {
-            "name": row[1],
-            "price": price,
-            "symbol": row[0].upper()
+            "name": stock["name"],
+            "price": float(stock["price_usd"]),
+            "symbol": stock["symbol"]
         }
 
     except:
         pass
 
-    # Query Alpha Vantage for quote instead
-    # https://www.alphavantage.co/documentation/
-    try:
+    # # Query Alpha Vantage for quote instead
+    # # https://www.alphavantage.co/documentation/
+    # try:
 
-        # GET CSV
-        url = f"https://www.alphavantage.co/query?apikey=NAJXWIA8D6VN6A3K&datatype=csv&function=TIME_SERIES_INTRADAY&interval=1min&symbol={symbol}"
-        webpage = urllib.request.urlopen(url)
+    #     # GET CSV
+    #     url = f"https://www.alphavantage.co/query?apikey=NAJXWIA8D6VN6A3K&datatype=csv&function=TIME_SERIES_INTRADAY&interval=1min&symbol={symbol}"
+    #     webpage = urllib.request.urlopen(url)
 
-        # Parse CSV
-        datareader = csv.reader(webpage.read().decode("utf-8").splitlines())
+    #     # Parse CSV
+    #     datareader = csv.reader(webpage.read().decode("utf-8").splitlines())
 
-        # Ignore first row
-        next(datareader)
+    #     # Ignore first row
+    #     next(datareader)
 
-        # Parse second row
-        row = next(datareader)
+    #     # Parse second row
+    #     row = next(datareader)
 
-        # Ensure stock exists
-        try:
-            price = float(row[4])
-        except:
-            return None
+    #     # Ensure stock exists
+    #     try:
+    #         price = float(row[4])
+    #     except:
+    #         return None
 
-        # Return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
-        return {
-            "name": symbol.upper(), # for backward compatibility with Yahoo
-            "price": price,
-            "symbol": symbol.upper()
-        }
+    #     # Return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
+    #     return {
+    #         "name": symbol.upper(), # for backward compatibility with Yahoo
+    #         "price": price,
+    #         "symbol": symbol.upper()
+    #     }
 
-    except:
-        return None
+    # except:
+    #     return None
 
 
 def usd(value):
